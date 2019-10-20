@@ -18,27 +18,31 @@ class ViewController: UIViewController {
 		
 		Observable.just(1)
 			.map({ (number) -> Int in
-				print(Thread.isMainThread)
+				print(Thread.isMainThread) //true
 				return number
 			})
 			.subscribeOn(MainScheduler.instance)
-			.map({ (number) -> Int in
-				print(Thread.isMainThread)
-				return number
+			.flatMap({ (_) -> Observable<Int> in
+				return Observable
+					.just(1)
+					.map { (number) -> Int in
+						print(Thread.isMainThread) //true
+						return number
+				}
 			})
-			.subscribeOn(MainScheduler.instance)
+			.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
 			.map({ (number) -> Int in
-				print(Thread.isMainThread)
+				print(Thread.isMainThread) //true
 				return number
 			})
 			.observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
 			.map({ (number) -> String in
-				print(Thread.isMainThread)
+				print(Thread.isMainThread) //false
 				return "\(number)"
 			})
 			.observeOn(MainScheduler.instance)
 			.subscribe(onNext: { (number) in
-				print(Thread.isMainThread)
+				print(Thread.isMainThread) //false
 				print(number)
 			})
 			.disposed(by: disposeBag)
