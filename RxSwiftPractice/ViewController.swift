@@ -26,9 +26,11 @@ class ViewController: UIViewController {
 				return Observable
 					.just(1)
 					.map { (number) -> Int in
-						print(Thread.isMainThread) //true
+						print(Thread.isMainThread) //false
 						return number
 				}
+				.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
+				.observeOn(MainScheduler.instance)
 			})
 			.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
 			.map({ (number) -> Int in
